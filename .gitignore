@@ -1,0 +1,5 @@
+.env
+drivers/*.dll
+drivers/*.dll.new
+*.log
+.claude
