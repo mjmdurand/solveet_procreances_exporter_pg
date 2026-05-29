@@ -24,5 +24,5 @@ CREATE TABLE CLIENT (
     WEBCLI VARCHAR(255)
 );
 CREATE INDEX numreda_ix ON client (NUMREDA);
-CREATE INDEX numint_ix ON client (NUMINT);
+CREATE INDEX numint_ix  ON client (NUMINT);
 CREATE INDEX numcomm_ix ON client (NUMCOMM);

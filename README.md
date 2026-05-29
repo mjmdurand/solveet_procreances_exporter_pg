@@ -14,11 +14,10 @@ ETL PowerShell qui extrait les données d'une base **HFSQL** (logiciel Procréan
 `drivers/*.dll` est gitignore. À exécuter une fois sur chaque poste :
 
 ```powershell
-$tmp = "$env:TEMP\npgsql"
-New-Item -ItemType Directory -Force $tmp | Out-Null
-& nuget install Npgsql -Version 3.2.7 -OutputDirectory $tmp -Source "https://api.nuget.org/v3/index.json"
-Copy-Item "$tmp\Npgsql.3.2.7\lib\netstandard2.0\Npgsql.dll" -Destination ".\drivers\Npgsql40.dll"
+.\setup.ps1
 ```
+
+Le script télécharge automatiquement `nuget.exe` si absent, récupère Npgsql 3.2.7 depuis nuget.org et place le DLL dans `drivers/`. Il est idempotent : sans effet si le DLL est déjà présent.
 
 ## Configuration
 

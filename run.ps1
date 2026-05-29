@@ -27,6 +27,11 @@ try {
     $connHFSQL = New-Object System.Data.Odbc.OdbcConnection("DSN=$($conf.DSN_HFSQL);UID=;PWD=")
     $connHFSQL.Open()
 
+    # Schéma dédié aux backups
+    $pgCmd = $pgConn.CreateCommand()
+    $pgCmd.CommandText = "CREATE SCHEMA IF NOT EXISTS backup"
+    $null = $pgCmd.ExecuteNonQuery()
+
     $createFiles = if ($TableToExport -ne "ALL") {
         $f = Get-ChildItem $sqlCreate -Filter "$TableToExport.sql"
         if (-not $f) { throw "Table '$TableToExport' introuvable dans $sqlCreate" }
@@ -37,7 +42,6 @@ try {
 
     foreach ($createFile in $createFiles) {
         $tableName  = $createFile.BaseName
-        $backupName = "${tableName}_backup"
         $selectFile = Join-Path $sqlSelect "$tableName.sql"
 
         if (-not (Test-Path $selectFile)) {
@@ -47,11 +51,12 @@ try {
 
         $pgCmd = $pgConn.CreateCommand()
 
-        $pgCmd.CommandText = "DROP TABLE IF EXISTS $backupName"
+        # Déplacer la table courante dans le schéma backup (libère aussi les noms d'index)
+        $pgCmd.CommandText = "DROP TABLE IF EXISTS backup.$tableName"
         $null = $pgCmd.ExecuteNonQuery()
 
-        $pgCmd.CommandText = "ALTER TABLE $tableName RENAME TO $backupName"
-        try   { $null = $pgCmd.ExecuteNonQuery(); Log-Message -Connection $pgConn -LogId $logId -Message "[INFO] $tableName → $backupName" }
+        $pgCmd.CommandText = "ALTER TABLE public.$tableName SET SCHEMA backup"
+        try   { $null = $pgCmd.ExecuteNonQuery(); Log-Message -Connection $pgConn -LogId $logId -Message "[INFO] $tableName → backup.$tableName" }
         catch { Log-Message -Connection $pgConn -LogId $logId -Message "[INFO] $tableName inexistante, pas de backup" }
 
         $pgCmd.CommandText = Get-Content $createFile.FullName -Raw
@@ -75,7 +80,7 @@ try {
         $null = $pgCmd.ExecuteNonQuery()
 
         foreach ($row in $data.Rows) {
-            $vals = @(foreach ($col in $cols) { Convert-ToSqlValue $row[$col] $col })
+            $vals = @(foreach ($col in $cols) { Convert-ToSqlValue $row[$col] })
             $batch.Add("($($vals -join ','))")
             $n++
 

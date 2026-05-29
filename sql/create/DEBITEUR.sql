@@ -29,6 +29,6 @@ CREATE TABLE DEBITEUR (
     DBANCIENNETE int,
     REMDEB VARCHAR(1000)
 );
-CREATE INDEX numcli_ix ON debiteur (NUMCLI);
+CREATE INDEX numcli_ix  ON debiteur (NUMCLI);
 CREATE INDEX etatdos_ix ON debiteur (ETATDOSS);
 CREATE INDEX setados_ix ON debiteur (SOUSETATDOSS);

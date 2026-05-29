@@ -68,11 +68,10 @@ PG_PORT     = "5432"
 `drivers/Npgsql40.dll` est gitignore. Pour le remettre en place sur une nouvelle machine :
 
 ```powershell
-$tmp = "$env:TEMP\npgsql"
-New-Item -ItemType Directory -Force $tmp | Out-Null
-& nuget install Npgsql -Version 3.2.7 -OutputDirectory $tmp -Source "https://api.nuget.org/v3/index.json"
-Copy-Item "$tmp\Npgsql.3.2.7\lib\netstandard2.0\Npgsql.dll" -Destination ".\drivers\Npgsql40.dll"
+.\setup.ps1
 ```
+
+`setup.ps1` télécharge `nuget.exe` si absent, récupère Npgsql 3.2.7 depuis nuget.org et copie le DLL dans `drivers/`. Idempotent.
 
 ## Logger
 
